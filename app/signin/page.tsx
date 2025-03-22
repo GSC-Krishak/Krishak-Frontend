@@ -1,11 +1,17 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaGoogle } from "react-icons/fa";
 import Head from "next/head";
 import Image from "next/image";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { app } from "../utils/firebase"; // Adjust the import path as necessary
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { app } from "../utils/firebase";
+import { useRouter } from "next/navigation";
 
 const auth = getAuth(app);
 
@@ -15,13 +21,24 @@ const handleGoogleSignIn = () => {
 };
 
 const LoginPage: React.FC = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push("/dashboard");
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
   return (
     <div className="flex min-h-screen bg-black text-white">
       <Head>
-        <title>Login | Namek Krishak</title>
+        <title>Login | Krishak</title>
         <meta
           name="description"
-          content="Login to Namek Krishak agriculture crop recommendation system"
+          content="Login to Krishak agriculture crop recommendation system"
         />
       </Head>
 
@@ -42,15 +59,13 @@ const LoginPage: React.FC = () => {
             >
               <Image
                 src="/logo1.jpeg"
-                alt="Namek Krishak Logo"
+                alt="Krishak Logo"
                 width={80}
                 height={80}
                 className="mx-auto rounded-full"
               />
             </motion.div>
-            <h1 className="text-3xl font-bold text-green-500 mb-2">
-              Namek Krishak
-            </h1>
+            <h1 className="text-3xl font-bold text-green-500 mb-2">Krishak</h1>
             <p className="text-gray-400">
               Your personal crop recommendation assistant
             </p>
