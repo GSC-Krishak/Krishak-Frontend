@@ -222,13 +222,12 @@ const DashboardPage = () => {
               <span>Dashboard</span>
             </Link>
 
-            <button
-              onClick={handleAddSoilData}
-              className="w-full flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-gray-800 transition-colors"
-            >
+            <button className="w-full flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-gray-800 transition-colors">
               <FiPlus className="text-green-500" />
               <span>
-                {soilData.length > 0 ? "Add New Soil Data" : "Add Soil Data"}
+                <Link href="/soilForm">
+                  {soilData.length > 0 ? "Add New Soil Data" : "Add Soil Data"}
+                </Link>
               </span>
             </button>
 
