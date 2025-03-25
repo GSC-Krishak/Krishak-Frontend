@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+ENV NEXT_PUBLIC_APP_URL = https://krishak-frontend-1015721062389.asia-south1.run.app
+
 RUN npm run build
 
 RUN npm ci --omit=dev
