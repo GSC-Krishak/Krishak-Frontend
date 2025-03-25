@@ -1,49 +1,33 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { SigninButton } from "@/app/components/signinButton";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "./utils/firebase";
-import { useRouter } from "next/navigation";
 
-export default function Home() {
-  return <Page />;
-}
-
-function Page() {
+const HomePage = () => {
+  const router = useRouter();
   const auth = getAuth(app);
-  const [user, setUser] = useState({ Loading: true, user: null });
 
   useEffect(() => {
-    onAuthStateChanged(auth, function (user) {
-      if (user && user.email) {
-        setUser({
-          Loading: false,
-          user: {
-            email: user.email,
-          },
-        });
-        console.log("This is the user: ", user);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push("/dashboard");
       } else {
-        setUser({
-          Loading: false,
-          user: null,
-        });
-        console.log("There is no logged in user");
+        router.push("/signin");
       }
     });
-  }, [auth]);
 
-  if (user.Loading) {
-    return <div>Loading</div>;
-  }
+    return () => unsubscribe();
+  }, [auth, router]);
 
-  if (!user.user) {
-    return (
-      <div className="">
-        <SigninButton />
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-black text-white">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-lg mt-4">Checking authentication...</p>
       </div>
-    );
-  }
+    </div>
+  );
+};
 
-  return <div>Welcome {user.user.email}</div>;
-}
+export default HomePage;

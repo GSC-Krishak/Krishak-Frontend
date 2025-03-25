@@ -1,56 +1,914 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Script from "next/script";
 
-// Access the API key from the environment variable
-const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+// List of Indian states and their districts
+const statesAndDistricts = [
+  {
+    state: "Andhra Pradesh",
+    districts: [
+      "Anantapur",
+      "Chittoor",
+      "East Godavari",
+      "Guntur",
+      "Krishna",
+      "Kurnool",
+      "Nellore",
+      "Prakasam",
+      "Srikakulam",
+      "Visakhapatnam",
+      "Vizianagaram",
+      "West Godavari",
+      "YSR Kadapa",
+    ],
+  },
+  {
+    state: "Arunachal Pradesh",
+    districts: [
+      "Tawang",
+      "West Kameng",
+      "East Kameng",
+      "Papum Pare",
+      "Kurung Kumey",
+      "Kra Daadi",
+      "Lower Subansiri",
+      "Upper Subansiri",
+      "West Siang",
+      "East Siang",
+      "Siang",
+      "Upper Siang",
+      "Lower Siang",
+      "Lower Dibang Valley",
+      "Dibang Valley",
+      "Anjaw",
+      "Lohit",
+      "Namsai",
+      "Changlang",
+      "Tirap",
+      "Longding",
+    ],
+  },
+  {
+    state: "Assam",
+    districts: [
+      "Baksa",
+      "Barpeta",
+      "Biswanath",
+      "Bongaigaon",
+      "Cachar",
+      "Charaideo",
+      "Chirang",
+      "Darrang",
+      "Dhemaji",
+      "Dhubri",
+      "Dibrugarh",
+      "Goalpara",
+      "Golaghat",
+      "Hailakandi",
+      "Hojai",
+      "Jorhat",
+      "Kamrup Metropolitan",
+      "Kamrup",
+      "Karbi Anglong",
+      "Karimganj",
+      "Kokrajhar",
+      "Lakhimpur",
+      "Majuli",
+      "Morigaon",
+      "Nagaon",
+      "Nalbari",
+      "Dima Hasao",
+      "Sivasagar",
+      "Sonitpur",
+      "South Salmara-Mankachar",
+      "Tinsukia",
+      "Udalguri",
+      "West Karbi Anglong",
+    ],
+  },
+  {
+    state: "Bihar",
+    districts: [
+      "Araria",
+      "Arwal",
+      "Aurangabad",
+      "Banka",
+      "Begusarai",
+      "Bhagalpur",
+      "Bhojpur",
+      "Buxar",
+      "Darbhanga",
+      "East Champaran (Motihari)",
+      "Gaya",
+      "Gopalganj",
+      "Jamui",
+      "Jehanabad",
+      "Kaimur (Bhabua)",
+      "Katihar",
+      "Khagaria",
+      "Kishanganj",
+      "Lakhisarai",
+      "Madhepura",
+      "Madhubani",
+      "Munger (Monghyr)",
+      "Muzaffarpur",
+      "Nalanda",
+      "Nawada",
+      "Patna",
+      "Purnia (Purnea)",
+      "Rohtas",
+      "Saharsa",
+      "Samastipur",
+      "Saran",
+      "Sheikhpura",
+      "Sheohar",
+      "Sitamarhi",
+      "Siwan",
+      "Supaul",
+      "Vaishali",
+      "West Champaran",
+    ],
+  },
+  {
+    state: "Chandigarh (UT)",
+    districts: ["Chandigarh"],
+  },
+  {
+    state: "Chhattisgarh",
+    districts: [
+      "Balod",
+      "Baloda Bazar",
+      "Balrampur",
+      "Bastar",
+      "Bemetara",
+      "Bijapur",
+      "Bilaspur",
+      "Dantewada (South Bastar)",
+      "Dhamtari",
+      "Durg",
+      "Gariyaband",
+      "Janjgir-Champa",
+      "Jashpur",
+      "Kabirdham (Kawardha)",
+      "Kanker (North Bastar)",
+      "Kondagaon",
+      "Korba",
+      "Korea (Koriya)",
+      "Mahasamund",
+      "Mungeli",
+      "Narayanpur",
+      "Raigarh",
+      "Raipur",
+      "Rajnandgaon",
+      "Sukma",
+      "Surajpur  ",
+      "Surguja",
+    ],
+  },
+  {
+    state: "Dadra and Nagar Haveli (UT)",
+    districts: ["Dadra & Nagar Haveli"],
+  },
+  {
+    state: "Daman and Diu (UT)",
+    districts: ["Daman", "Diu"],
+  },
+  {
+    state: "Delhi (NCT)",
+    districts: [
+      "Central Delhi",
+      "East Delhi",
+      "New Delhi",
+      "North Delhi",
+      "North East  Delhi",
+      "North West  Delhi",
+      "Shahdara",
+      "South Delhi",
+      "South East Delhi",
+      "South West  Delhi",
+      "West Delhi",
+    ],
+  },
+  {
+    state: "Goa",
+    districts: ["North Goa", "South Goa"],
+  },
+  {
+    state: "Gujarat",
+    districts: [
+      "Ahmedabad",
+      "Amreli",
+      "Anand",
+      "Aravalli",
+      "Banaskantha (Palanpur)",
+      "Bharuch",
+      "Bhavnagar",
+      "Botad",
+      "Chhota Udepur",
+      "Dahod",
+      "Dangs (Ahwa)",
+      "Devbhoomi Dwarka",
+      "Gandhinagar",
+      "Gir Somnath",
+      "Jamnagar",
+      "Junagadh",
+      "Kachchh",
+      "Kheda (Nadiad)",
+      "Mahisagar",
+      "Mehsana",
+      "Morbi",
+      "Narmada (Rajpipla)",
+      "Navsari",
+      "Panchmahal (Godhra)",
+      "Patan",
+      "Porbandar",
+      "Rajkot",
+      "Sabarkantha (Himmatnagar)",
+      "Surat",
+      "Surendranagar",
+      "Tapi (Vyara)",
+      "Vadodara",
+      "Valsad",
+    ],
+  },
+  {
+    state: "Haryana",
+    districts: [
+      "Ambala",
+      "Bhiwani",
+      "Charkhi Dadri",
+      "Faridabad",
+      "Fatehabad",
+      "Gurgaon",
+      "Hisar",
+      "Jhajjar",
+      "Jind",
+      "Kaithal",
+      "Karnal",
+      "Kurukshetra",
+      "Mahendragarh",
+      "Mewat",
+      "Palwal",
+      "Panchkula",
+      "Panipat",
+      "Rewari",
+      "Rohtak",
+      "Sirsa",
+      "Sonipat",
+      "Yamunanagar",
+    ],
+  },
+  {
+    state: "Himachal Pradesh",
+    districts: [
+      "Bilaspur",
+      "Chamba",
+      "Hamirpur",
+      "Kangra",
+      "Kinnaur",
+      "Kullu",
+      "Lahaul &amp; Spiti",
+      "Mandi",
+      "Shimla",
+      "Sirmaur (Sirmour)",
+      "Solan",
+      "Una",
+    ],
+  },
+  {
+    state: "Jammu and Kashmir",
+    districts: [
+      "Anantnag",
+      "Bandipore",
+      "Baramulla",
+      "Budgam",
+      "Doda",
+      "Ganderbal",
+      "Jammu",
+      "Kargil",
+      "Kathua",
+      "Kishtwar",
+      "Kulgam",
+      "Kupwara",
+      "Leh",
+      "Poonch",
+      "Pulwama",
+      "Rajouri",
+      "Ramban",
+      "Reasi",
+      "Samba",
+      "Shopian",
+      "Srinagar",
+      "Udhampur",
+    ],
+  },
+  {
+    state: "Jharkhand",
+    districts: [
+      "Bokaro",
+      "Chatra",
+      "Deoghar",
+      "Dhanbad",
+      "Dumka",
+      "East Singhbhum",
+      "Garhwa",
+      "Giridih",
+      "Godda",
+      "Gumla",
+      "Hazaribag",
+      "Jamtara",
+      "Khunti",
+      "Koderma",
+      "Latehar",
+      "Lohardaga",
+      "Pakur",
+      "Palamu",
+      "Ramgarh",
+      "Ranchi",
+      "Sahibganj",
+      "Seraikela-Kharsawan",
+      "Simdega",
+      "West Singhbhum",
+    ],
+  },
+  {
+    state: "Karnataka",
+    districts: [
+      "Bagalkot",
+      "Ballari (Bellary)",
+      "Belagavi (Belgaum)",
+      "Bengaluru (Bangalore) Rural",
+      "Bengaluru (Bangalore) Urban",
+      "Bidar",
+      "Chamarajanagar",
+      "Chikballapur",
+      "Chikkamagaluru (Chikmagalur)",
+      "Chitradurga",
+      "Dakshina Kannada",
+      "Davangere",
+      "Dharwad",
+      "Gadag",
+      "Hassan",
+      "Haveri",
+      "Kalaburagi (Gulbarga)",
+      "Kodagu",
+      "Kolar",
+      "Koppal",
+      "Mandya",
+      "Mysuru (Mysore)",
+      "Raichur",
+      "Ramanagara",
+      "Shivamogga (Shimoga)",
+      "Tumakuru (Tumkur)",
+      "Udupi",
+      "Uttara Kannada (Karwar)",
+      "Vijayapura (Bijapur)",
+      "Yadgir",
+    ],
+  },
+  {
+    state: "Kerala",
+    districts: [
+      "Alappuzha",
+      "Ernakulam",
+      "Idukki",
+      "Kannur",
+      "Kasaragod",
+      "Kollam",
+      "Kottayam",
+      "Kozhikode",
+      "Malappuram",
+      "Palakkad",
+      "Pathanamthitta",
+      "Thiruvananthapuram",
+      "Thrissur",
+      "Wayanad",
+    ],
+  },
+  {
+    state: "Lakshadweep (UT)",
+    districts: [
+      "Agatti",
+      "Amini",
+      "Androth",
+      "Bithra",
+      "Chethlath",
+      "Kavaratti",
+      "Kadmath",
+      "Kalpeni",
+      "Kilthan",
+      "Minicoy",
+    ],
+  },
+  {
+    state: "Madhya Pradesh",
+    districts: [
+      "Agar Malwa",
+      "Alirajpur",
+      "Anuppur",
+      "Ashoknagar",
+      "Balaghat",
+      "Barwani",
+      "Betul",
+      "Bhind",
+      "Bhopal",
+      "Burhanpur",
+      "Chhatarpur",
+      "Chhindwara",
+      "Damoh",
+      "Datia",
+      "Dewas",
+      "Dhar",
+      "Dindori",
+      "Guna",
+      "Gwalior",
+      "Harda",
+      "Hoshangabad",
+      "Indore",
+      "Jabalpur",
+      "Jhabua",
+      "Katni",
+      "Khandwa",
+      "Khargone",
+      "Mandla",
+      "Mandsaur",
+      "Morena",
+      "Narsinghpur",
+      "Neemuch",
+      "Panna",
+      "Raisen",
+      "Rajgarh",
+      "Ratlam",
+      "Rewa",
+      "Sagar",
+      "Satna",
+      "Sehore",
+      "Seoni",
+      "Shahdol",
+      "Shajapur",
+      "Sheopur",
+      "Shivpuri",
+      "Sidhi",
+      "Singrauli",
+      "Tikamgarh",
+      "Ujjain",
+      "Umaria",
+      "Vidisha",
+    ],
+  },
+  {
+    state: "Maharashtra",
+    districts: [
+      "Ahmednagar",
+      "Akola",
+      "Amravati",
+      "Aurangabad",
+      "Beed",
+      "Bhandara",
+      "Buldhana",
+      "Chandrapur",
+      "Dhule",
+      "Gadchiroli",
+      "Gondia",
+      "Hingoli",
+      "Jalgaon",
+      "Jalna",
+      "Kolhapur",
+      "Latur",
+      "Mumbai City",
+      "Mumbai Suburban",
+      "Nagpur",
+      "Nanded",
+      "Nandurbar",
+      "Nashik",
+      "Osmanabad",
+      "Palghar",
+      "Parbhani",
+      "Pune",
+      "Raigad",
+      "Ratnagiri",
+      "Sangli",
+      "Satara",
+      "Sindhudurg",
+      "Solapur",
+      "Thane",
+      "Wardha",
+      "Washim",
+      "Yavatmal",
+    ],
+  },
+  {
+    state: "Manipur",
+    districts: [
+      "Bishnupur",
+      "Chandel",
+      "Churachandpur",
+      "Imphal East",
+      "Imphal West",
+      "Jiribam",
+      "Kakching",
+      "Kamjong",
+      "Kangpokpi",
+      "Noney",
+      "Pherzawl",
+      "Senapati",
+      "Tamenglong",
+      "Tengnoupal",
+      "Thoubal",
+      "Ukhrul",
+    ],
+  },
+  {
+    state: "Meghalaya",
+    districts: [
+      "East Garo Hills",
+      "East Jaintia Hills",
+      "East Khasi Hills",
+      "North Garo Hills",
+      "Ri Bhoi",
+      "South Garo Hills",
+      "South West Garo Hills ",
+      "South West Khasi Hills",
+      "West Garo Hills",
+      "West Jaintia Hills",
+      "West Khasi Hills",
+    ],
+  },
+  {
+    state: "Mizoram",
+    districts: [
+      "Aizawl",
+      "Champhai",
+      "Kolasib",
+      "Lawngtlai",
+      "Lunglei",
+      "Mamit",
+      "Saiha",
+      "Serchhip",
+    ],
+  },
+  {
+    state: "Nagaland",
+    districts: [
+      "Dimapur",
+      "Kiphire",
+      "Kohima",
+      "Longleng",
+      "Mokokchung",
+      "Mon",
+      "Peren",
+      "Phek",
+      "Tuensang",
+      "Wokha",
+      "Zunheboto",
+    ],
+  },
+  {
+    state: "Odisha",
+    districts: [
+      "Angul",
+      "Balangir",
+      "Balasore",
+      "Bargarh",
+      "Bhadrak",
+      "Boudh",
+      "Cuttack",
+      "Deogarh",
+      "Dhenkanal",
+      "Gajapati",
+      "Ganjam",
+      "Jagatsinghapur",
+      "Jajpur",
+      "Jharsuguda",
+      "Kalahandi",
+      "Kandhamal",
+      "Kendrapara",
+      "Kendujhar (Keonjhar)",
+      "Khordha",
+      "Koraput",
+      "Malkangiri",
+      "Mayurbhanj",
+      "Nabarangpur",
+      "Nayagarh",
+      "Nuapada",
+      "Puri",
+      "Rayagada",
+      "Sambalpur",
+      "Sonepur",
+      "Sundargarh",
+    ],
+  },
+  {
+    state: "Puducherry (UT)",
+    districts: ["Karaikal", "Mahe", "Pondicherry", "Yanam"],
+  },
+  {
+    state: "Punjab",
+    districts: [
+      "Amritsar",
+      "Barnala",
+      "Bathinda",
+      "Faridkot",
+      "Fatehgarh Sahib",
+      "Fazilka",
+      "Ferozepur",
+      "Gurdaspur",
+      "Hoshiarpur",
+      "Jalandhar",
+      "Kapurthala",
+      "Ludhiana",
+      "Mansa",
+      "Moga",
+      "Muktsar",
+      "Nawanshahr (Shahid Bhagat Singh Nagar)",
+      "Pathankot",
+      "Patiala",
+      "Rupnagar",
+      "Sahibzada Ajit Singh Nagar (Mohali)",
+      "Sangrur",
+      "Tarn Taran",
+    ],
+  },
+  {
+    state: "Rajasthan",
+    districts: [
+      "Ajmer",
+      "Alwar",
+      "Banswara",
+      "Baran",
+      "Barmer",
+      "Bharatpur",
+      "Bhilwara",
+      "Bikaner",
+      "Bundi",
+      "Chittorgarh",
+      "Churu",
+      "Dausa",
+      "Dholpur",
+      "Dungarpur",
+      "Hanumangarh",
+      "Jaipur",
+      "Jaisalmer",
+      "Jalore",
+      "Jhalawar",
+      "Jhunjhunu",
+      "Jodhpur",
+      "Karauli",
+      "Kota",
+      "Nagaur",
+      "Pali",
+      "Pratapgarh",
+      "Rajsamand",
+      "Sawai Madhopur",
+      "Sikar",
+      "Sirohi",
+      "Sri Ganganagar",
+      "Tonk",
+      "Udaipur",
+    ],
+  },
+  {
+    state: "Sikkim",
+    districts: ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+  },
+  {
+    state: "Tamil Nadu",
+    districts: [
+      "Ariyalur",
+      "Chennai",
+      "Coimbatore",
+      "Cuddalore",
+      "Dharmapuri",
+      "Dindigul",
+      "Erode",
+      "Kanchipuram",
+      "Kanyakumari",
+      "Karur",
+      "Krishnagiri",
+      "Madurai",
+      "Nagapattinam",
+      "Namakkal",
+      "Nilgiris",
+      "Perambalur",
+      "Pudukkottai",
+      "Ramanathapuram",
+      "Salem",
+      "Sivaganga",
+      "Thanjavur",
+      "Theni",
+      "Thoothukudi (Tuticorin)",
+      "Tiruchirappalli",
+      "Tirunelveli",
+      "Tiruppur",
+      "Tiruvallur",
+      "Tiruvannamalai",
+      "Tiruvarur",
+      "Vellore",
+      "Viluppuram",
+      "Virudhunagar",
+    ],
+  },
+  {
+    state: "Telangana",
+    districts: [
+      "Adilabad",
+      "Bhadradri Kothagudem",
+      "Hyderabad",
+      "Jagtial",
+      "Jangaon",
+      "Jayashankar Bhoopalpally",
+      "Jogulamba Gadwal",
+      "Kamareddy",
+      "Karimnagar",
+      "Khammam",
+      "Komaram Bheem Asifabad",
+      "Mahabubabad",
+      "Mahabubnagar",
+      "Mancherial",
+      "Medak",
+      "Medchal",
+      "Nagarkurnool",
+      "Nalgonda",
+      "Nirmal",
+      "Nizamabad",
+      "Peddapalli",
+      "Rajanna Sircilla",
+      "Rangareddy",
+      "Sangareddy",
+      "Siddipet",
+      "Suryapet",
+      "Vikarabad",
+      "Wanaparthy",
+      "Warangal (Rural)",
+      "Warangal (Urban)",
+      "Yadadri Bhuvanagiri",
+    ],
+  },
+  {
+    state: "Tripura",
+    districts: [
+      "Dhalai",
+      "Gomati",
+      "Khowai",
+      "North Tripura",
+      "Sepahijala",
+      "South Tripura",
+      "Unakoti",
+      "West Tripura",
+    ],
+  },
+  {
+    state: "Uttarakhand",
+    districts: [
+      "Almora",
+      "Bageshwar",
+      "Chamoli",
+      "Champawat",
+      "Dehradun",
+      "Haridwar",
+      "Nainital",
+      "Pauri Garhwal",
+      "Pithoragarh",
+      "Rudraprayag",
+      "Tehri Garhwal",
+      "Udham Singh Nagar",
+      "Uttarkashi",
+    ],
+  },
+  {
+    state: "Uttar Pradesh",
+    districts: [
+      "Agra",
+      "Aligarh",
+      "Allahabad",
+      "Ambedkar Nagar",
+      "Amethi (Chatrapati Sahuji Mahraj Nagar)",
+      "Amroha (J.P. Nagar)",
+      "Auraiya",
+      "Azamgarh",
+      "Baghpat",
+      "Bahraich",
+      "Ballia",
+      "Balrampur",
+      "Banda",
+      "Barabanki",
+      "Bareilly",
+      "Basti",
+      "Bhadohi",
+      "Bijnor",
+      "Budaun",
+      "Bulandshahr",
+      "Chandauli",
+      "Chitrakoot",
+      "Deoria",
+      "Etah",
+      "Etawah",
+      "Faizabad",
+      "Farrukhabad",
+      "Fatehpur",
+      "Firozabad",
+      "Gautam Buddha Nagar",
+      "Ghaziabad",
+      "Ghazipur",
+      "Gonda",
+      "Gorakhpur",
+      "Hamirpur",
+      "Hapur (Panchsheel Nagar)",
+      "Hardoi",
+      "Hathras",
+      "Jalaun",
+      "Jaunpur",
+      "Jhansi",
+      "Kannauj",
+      "Kanpur Dehat",
+      "Kanpur Nagar",
+      "Kanshiram Nagar (Kasganj)",
+      "Kaushambi",
+      "Kushinagar (Padrauna)",
+      "Lakhimpur - Kheri",
+      "Lalitpur",
+      "Lucknow",
+      "Maharajganj",
+      "Mahoba",
+      "Mainpuri",
+      "Mathura",
+      "Mau",
+      "Meerut",
+      "Mirzapur",
+      "Moradabad",
+      "Muzaffarnagar",
+      "Pilibhit",
+      "Pratapgarh",
+      "RaeBareli",
+      "Rampur",
+      "Saharanpur",
+      "Sambhal (Bhim Nagar)",
+      "Sant Kabir Nagar",
+      "Shahjahanpur",
+      "Shamali (Prabuddh Nagar)",
+      "Shravasti",
+      "Siddharth Nagar",
+      "Sitapur",
+      "Sonbhadra",
+      "Sultanpur",
+      "Unnao",
+      "Varanasi",
+    ],
+  },
+  {
+    state: "West Bengal",
+    districts: [
+      "Alipurduar",
+      "Bankura",
+      "Birbhum",
+      "Burdwan (Bardhaman)",
+      "Cooch Behar",
+      "Dakshin Dinajpur (South Dinajpur)",
+      "Darjeeling",
+      "Hooghly",
+      "Howrah",
+      "Jalpaiguri",
+      "Kalimpong",
+      "Kolkata",
+      "Malda",
+      "Murshidabad",
+      "Nadia",
+      "North 24 Parganas",
+      "Paschim Medinipur (West Medinipur)",
+      "Purba Medinipur (East Medinipur)",
+      "Purulia",
+      "South 24 Parganas",
+      "Uttar Dinajpur (North Dinajpur)",
+    ],
+  },
+
+  // Add other states and their districts here
+];
 
 const SoilForm = () => {
   const [formData, setFormData] = useState({
     n: "",
     p: "",
     k: "",
-    location: "",
+    state: "",
+    district: "",
     magnesium: "",
     calcium: "",
     moisture: "",
   });
 
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [districts, setDistricts] = useState<string[]>([]);
 
-  // Define the initAutocomplete function
-  useEffect(() => {
-    window.initAutocomplete = () => {
-      setScriptLoaded(true);
-      initAutocomplete();
-    };
-  }, []);
-
-  const initAutocomplete = () => {
-    const locationInput = document.getElementById(
-      "location"
-    ) as HTMLInputElement;
-
-    const locationAutocomplete = new google.maps.places.Autocomplete(
-      locationInput,
-      {
-        types: ["geocode"],
-        componentRestrictions: { country: "in" },
-      }
-    );
-
-    locationAutocomplete.addListener("place_changed", () => {
-      const place = locationAutocomplete.getPlace();
-      const locationName = place.formatted_address;
-
-      if (locationName) {
-        setFormData((prevData) => ({
-          ...prevData,
-          location: locationName,
-        }));
-      }
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedState = e.target.value;
+    setFormData({
+      ...formData,
+      state: selectedState,
+      district: "", // Reset district when state changes
     });
+    const stateData = statesAndDistricts.find(
+      (state) => state.state === selectedState
+    );
+    setDistricts(stateData ? stateData.districts : []);
   };
 
   const handleChange = (
@@ -58,22 +916,8 @@ const SoilForm = () => {
   ) => {
     const { name, value } = e.target;
 
-    if (name === "location") {
-      setFormData({
-        ...formData,
-        location: value,
-      });
-    } else if (
-      ["n", "p", "k", "magnesium", "calcium", "moisture"].includes(name)
-    ) {
-      const numValue = value === "" ? "" : Number(value);
-
-      if (numValue === "" || (numValue >= 0 && numValue <= 100)) {
-        setFormData({
-          ...formData,
-          [name]: value,
-        });
-      }
+    if (name === "state") {
+      handleStateChange(e as React.ChangeEvent<HTMLSelectElement>);
     } else {
       setFormData({
         ...formData,
@@ -85,8 +929,8 @@ const SoilForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.location) {
-      alert("Please select a valid location.");
+    if (!formData.state || !formData.district) {
+      alert("Please select a valid state and district.");
       return;
     }
 
@@ -111,231 +955,252 @@ const SoilForm = () => {
   };
 
   return (
-    <>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=initAutocomplete`}
-        strategy="afterInteractive"
-        onError={() => {
-          console.error("Failed to load Google Maps script");
-          setLoadError("Failed to load Google Maps. Please refresh the page.");
-        }}
-      />
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="w-full max-w-xl">
+        <div className="bg-gray-800 backdrop-blur-lg bg-opacity-80 rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-600 to-green-400 py-6 px-8">
+            <h2 className="text-2xl font-bold text-white text-center tracking-wide">
+              Soil Analysis Data Form
+            </h2>
+            <p className="text-green-100 text-center mt-1">
+              Enter your soil composition details
+            </p>
+          </div>
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="w-full max-w-xl">
-          <div className="bg-gray-800 backdrop-blur-lg bg-opacity-80 rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-green-600 to-green-400 py-6 px-8">
-              <h2 className="text-2xl font-bold text-white text-center tracking-wide">
-                Soil Analysis Data Form
-              </h2>
-              <p className="text-green-100 text-center mt-1">
-                Enter your soil composition details
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="n"
-                    className="text-sm font-medium text-green-300"
-                  >
-                    Nitrogen (N) %
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="n"
-                      name="n"
-                      value={formData.n}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                      placeholder="0-100%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="p"
-                    className="text-sm font-medium text-green-300"
-                  >
-                    Phosphorus (P) %
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="p"
-                      name="p"
-                      value={formData.p}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                      placeholder="0-100%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="k"
-                    className="text-sm font-medium text-green-300"
-                  >
-                    Potassium (K) %
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="k"
-                      name="k"
-                      value={formData.k}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                      placeholder="0-100%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="magnesium"
-                    className="text-sm font-medium text-green-300"
-                  >
-                    Magnesium (Mg) %
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="magnesium"
-                      name="magnesium"
-                      value={formData.magnesium}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                      placeholder="0-100%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="calcium"
-                    className="text-sm font-medium text-green-300"
-                  >
-                    Calcium (Ca) %
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="calcium"
-                      name="calcium"
-                      value={formData.calcium}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                      placeholder="0-100%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="moisture"
-                    className="text-sm font-medium text-green-300"
-                  >
-                    Moisture %
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="moisture"
-                      name="moisture"
-                      value={formData.moisture}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                      placeholder="0-100%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span className="text-gray-400">%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 space-y-2">
+          <form onSubmit={handleSubmit} className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <label
-                  htmlFor="location"
+                  htmlFor="n"
                   className="text-sm font-medium text-green-300"
                 >
-                  Location
+                  Nitrogen (N) %
                 </label>
                 <div className="relative">
                   <input
-                    id="location"
-                    name="location"
-                    value={formData.location}
+                    type="number"
+                    id="n"
+                    name="n"
+                    value={formData.n}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="0-100%"
+                    min="0"
+                    max="100"
+                    step="0.01"
                     required
                   />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400">%</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-10">
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-medium py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 transform hover:-translate-y-0.5 transition-all duration-150 ease-in-out"
-                  disabled={!scriptLoaded || !formData.location}
+              <div className="space-y-2">
+                <label
+                  htmlFor="p"
+                  className="text-sm font-medium text-green-300"
                 >
-                  Analyze Soil Composition
-                </button>
+                  Phosphorus (P) %
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="p"
+                    name="p"
+                    value={formData.p}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="0-100%"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400">%</span>
+                  </div>
+                </div>
               </div>
-            </form>
-          </div>
 
-          <p className="mt-6 text-center text-sm text-gray-400">
-            All data is processed securely and used to provide accurate
-            analysis.
-          </p>
+              <div className="space-y-2">
+                <label
+                  htmlFor="k"
+                  className="text-sm font-medium text-green-300"
+                >
+                  Potassium (K) %
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="k"
+                    name="k"
+                    value={formData.k}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="0-100%"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="magnesium"
+                  className="text-sm font-medium text-green-300"
+                >
+                  Magnesium (Mg) %
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="magnesium"
+                    name="magnesium"
+                    value={formData.magnesium}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="0-100%"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="calcium"
+                  className="text-sm font-medium text-green-300"
+                >
+                  Calcium (Ca) %
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="calcium"
+                    name="calcium"
+                    value={formData.calcium}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="0-100%"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="moisture"
+                  className="text-sm font-medium text-green-300"
+                >
+                  Moisture %
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="moisture"
+                    name="moisture"
+                    value={formData.moisture}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="0-100%"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 space-y-2">
+              <label
+                htmlFor="state"
+                className="text-sm font-medium text-green-300"
+              >
+                State
+              </label>
+              <div className="relative">
+                <select
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  required
+                >
+                  <option value="">Select State</option>
+                  {statesAndDistricts.map((state) => (
+                    <option key={state.state} value={state.state}>
+                      {state.state}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <label
+                htmlFor="district"
+                className="text-sm font-medium text-green-300"
+              >
+                District
+              </label>
+              <div className="relative">
+                <select
+                  id="district"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  required
+                  disabled={!formData.state}
+                >
+                  <option value="">Select District</option>
+                  {districts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-medium py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 transform hover:-translate-y-0.5 transition-all duration-150 ease-in-out"
+              >
+                Analyze Soil Composition
+              </button>
+            </div>
+          </form>
         </div>
+
+        <p className="mt-6 text-center text-sm text-gray-400">
+          All data is processed securely and used to provide accurate analysis.
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -121,7 +121,7 @@ const LoginPage: React.FC = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/90 z-10"></div>
           <Image
-            src="/img1.jpg"
+            src="/signin.jpg"
             alt="Agriculture Field"
             layout="fill"
             objectFit="cover"

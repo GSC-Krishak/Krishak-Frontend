@@ -18,7 +18,6 @@ import {
   FiPlus,
   FiEdit,
   FiList,
-  FiUser,
   FiCalendar,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
@@ -343,7 +342,7 @@ const DashboardPage = () => {
           <section className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Recommended Crops</h2>
-              <Link
+              {/* <Link
                 href="/recommendations"
                 className="text-green-500 hover:text-green-400 text-sm flex items-center transition-colors"
               >
@@ -362,7 +361,7 @@ const DashboardPage = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </Link>
+              </Link> */}
             </div>
 
             {soilData.length === 0 ? (
@@ -436,7 +435,7 @@ const DashboardPage = () => {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Recommendation History</h2>
-              <Link
+              {/* <Link
                 href="/history"
                 className="text-green-500 hover:text-green-400 text-sm flex items-center transition-colors"
               >
@@ -455,7 +454,7 @@ const DashboardPage = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </Link>
+              </Link> */}
             </div>
 
             {history.length === 0 ? (
