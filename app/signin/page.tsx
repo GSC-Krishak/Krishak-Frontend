@@ -93,21 +93,6 @@ const LoginPage: React.FC = () => {
               Sign in with Google
             </motion.button>
           </div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-8 text-center text-sm text-gray-400"
-          >
-            Don't have an account?{" "}
-            <a
-              href="/register"
-              className="font-medium text-green-500 hover:text-green-400 transition-colors"
-            >
-              Sign up
-            </a>
-          </motion.p>
         </motion.div>
       </div>
 

@@ -1,16 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { app } from "../utils/firebase";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-} from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { User } from "firebase/auth";
 import {
   FiHome,
   FiSettings,
@@ -18,7 +13,6 @@ import {
   FiPlus,
   FiEdit,
   FiList,
-  FiCalendar,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 
@@ -89,43 +83,13 @@ const MOCK_RECOMMENDED_CROPS = [
   },
 ];
 
-const MOCK_HISTORY = [
-  {
-    id: 1,
-    date: "2025-03-01",
-    fieldName: "North Field",
-    cropRecommended: "Wheat",
-    actualCrop: "Wheat",
-    success: true,
-  },
-  {
-    id: 2,
-    date: "2024-09-15",
-    fieldName: "South Field",
-    cropRecommended: "Corn",
-    actualCrop: "Corn",
-    success: true,
-  },
-  {
-    id: 3,
-    date: "2024-03-10",
-    fieldName: "North Field",
-    cropRecommended: "Soybeans",
-    actualCrop: "Rice",
-    success: false,
-  },
-];
-
 const auth = getAuth(app);
 
 const DashboardPage = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [soilData, setSoilData] = useState(MOCK_SOIL_DATA);
-  const [recommendedCrops, setRecommendedCrops] = useState(
-    MOCK_RECOMMENDED_CROPS
-  );
-  const [history, setHistory] = useState(MOCK_HISTORY);
+  const [soilData, setSoilData] = useState(MOCK_SOIL_DATA); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [recommendedCrops, setRecommendedCrops] = useState(MOCK_RECOMMENDED_CROPS); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const router = useRouter();
 
@@ -139,11 +103,6 @@ const DashboardPage = () => {
     });
     return () => unsubscribe();
   }, [router]);
-
-  const handleGoogleSignIn = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider);
-  };
 
   const handleLogout = () => {
     signOut(auth).then(() => {
@@ -427,92 +386,6 @@ const DashboardPage = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </section>
-
-          {/* History Section */}
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Recommendation History</h2>
-              {/* <Link
-                href="/history"
-                className="text-green-500 hover:text-green-400 text-sm flex items-center transition-colors"
-              >
-                View Full History
-                <svg
-                  className="w-4 h-4 ml-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Link> */}
-            </div>
-
-            {history.length === 0 ? (
-              <div className="bg-gray-800 rounded-lg p-8 text-center">
-                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FiCalendar className="text-green-500 text-xl" />
-                </div>
-                <h3 className="text-xl font-medium mb-2">No History Yet</h3>
-                <p className="text-gray-400">
-                  Your recommendation history will appear here
-                </p>
-              </div>
-            ) : (
-              <div className="bg-gray-800 rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-900">
-                        <th className="text-left py-3 px-4 font-medium">
-                          Date
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium">
-                          Field
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium">
-                          Recommended
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium">
-                          Actual Crop
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium">
-                          Result
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {history.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-750">
-                          <td className="py-3 px-4">{item.date}</td>
-                          <td className="py-3 px-4">{item.fieldName}</td>
-                          <td className="py-3 px-4">{item.cropRecommended}</td>
-                          <td className="py-3 px-4">{item.actualCrop}</td>
-                          <td className="py-3 px-4">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                item.success
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {item.success ? "Success" : "Different Choice"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </div>
             )}
           </section>

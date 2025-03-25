@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 // List of Indian states and their districts
 const statesAndDistricts = [
