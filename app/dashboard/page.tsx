@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "../utils/firebase";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { User } from "firebase/auth";
 
 // Type definitions (keep existing interfaces)
 interface SoilData {
@@ -50,7 +51,7 @@ const SoilRecommendationPage: React.FC = () => {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const router = useRouter();
   const auth = getAuth(app);
@@ -64,7 +65,7 @@ const SoilRecommendationPage: React.FC = () => {
       }
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [auth, router]);
 
   // Existing input change handler
   const handleInputChange = (
