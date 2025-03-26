@@ -1,6 +1,6 @@
 # Krishak Frontend
 
-![Krishak Logo](https://i.postimg.cc/Z5q5vm7g/logo1.jpg) <!-- Replace with actual logo URL -->
+[![logo1.jpg](https://i.postimg.cc/Z5q5vm7g/logo1.jpg)](https://postimg.cc/HVfgFqC4) <!-- Replace with actual logo URL -->
 
 ## 🚀 Overview
 Krishak-Frontend is the user interface of the Krishak platform, designed to empower farmers with digital tools for better agricultural management. This repository contains the source code for the frontend built with modern web technologies.
