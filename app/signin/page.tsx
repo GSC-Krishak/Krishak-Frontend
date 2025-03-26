@@ -18,6 +18,7 @@ const auth = getAuth(app);
 const handleGoogleSignIn = () => {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider);
+  
 };
 
 const LoginPage: React.FC = () => {

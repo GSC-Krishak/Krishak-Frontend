@@ -1,102 +1,64 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiSend, FiAlertCircle, FiLogOut } from "react-icons/fi";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "../utils/firebase";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
-import { User } from "firebase/auth";
-import {
-  FiHome,
-  FiSettings,
-  FiLogOut,
-  FiPlus,
-  FiEdit,
-  FiList,
-} from "react-icons/fi";
-import { motion } from "framer-motion";
 
-// Mock data for demonstration
-const MOCK_SOIL_DATA = [
-  {
-    id: 1,
-    name: "North Field",
-    ph: 6.5,
-    nitrogen: 120,
-    phosphorus: 45,
-    potassium: 85,
-    organicMatter: 3.2,
-    date: "2025-02-15",
-  },
-  {
-    id: 2,
-    name: "South Field",
-    ph: 7.2,
-    nitrogen: 95,
-    phosphorus: 35,
-    potassium: 90,
-    organicMatter: 2.8,
-    date: "2025-03-01",
-  },
-];
+// Type definitions (keep existing interfaces)
+interface SoilData {
+  n: number;
+  p: number;
+  k: number;
+  mg: number;
+  calcium: number;
+  ph: number;
+  previous_crops: string[];
+  district: string;
+  state: string;
+}
 
-const MOCK_RECOMMENDED_CROPS = [
-  {
-    id: 1,
-    name: "Wheat",
-    confidence: 95,
-    soilMatch: "Excellent",
-    yield: "High",
-    profit: "$$$",
-  },
-  {
-    id: 2,
-    name: "Corn",
-    confidence: 90,
-    soilMatch: "Very Good",
-    yield: "High",
-    profit: "$$$",
-  },
-  {
-    id: 3,
-    name: "Soybeans",
-    confidence: 85,
-    soilMatch: "Good",
-    yield: "Medium",
-    profit: "$$",
-  },
-  {
-    id: 4,
-    name: "Rice",
-    confidence: 80,
-    soilMatch: "Good",
-    yield: "Medium",
-    profit: "$$",
-  },
-  {
-    id: 5,
-    name: "Barley",
-    confidence: 75,
-    soilMatch: "Fair",
-    yield: "Medium",
-    profit: "$$",
-  },
-];
+interface FertilizerAdjustment {
+  [key: string]: string;
+}
 
-const auth = getAuth(app);
+interface RecommendedCrop {
+  Commodity: string;
+  Profitability: number;
+  Fertilizer_Cost: number;
+  Fertilizer_Adjustments: FertilizerAdjustment;
+  Compatibility: string;
+}
 
-const DashboardPage = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [soilData, setSoilData] = useState(MOCK_SOIL_DATA); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const [recommendedCrops, setRecommendedCrops] = useState(MOCK_RECOMMENDED_CROPS); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const SoilRecommendationPage: React.FC = () => {
+  // Existing state variables
+  const [soilData, setSoilData] = useState<SoilData>({
+    n: 0,
+    p: 0,
+    k: 0,
+    mg: 0,
+    calcium: 0,
+    ph: 0,
+    previous_crops: [],
+    district: "",
+    state: "",
+  });
+  const [recommendedCrops, setRecommendedCrops] = useState<RecommendedCrop[]>(
+    []
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const router = useRouter();
+  const auth = getAuth(app);
 
+  // Existing useEffect for authentication
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setLoading(false);
       if (!currentUser) {
         router.push("/signin");
       }
@@ -104,48 +66,162 @@ const DashboardPage = () => {
     return () => unsubscribe();
   }, [router]);
 
+  // Existing input change handler
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    // Special handling for previous_crops
+    if (name === "previous_crops") {
+      setSoilData((prev) => ({
+        ...prev,
+        previous_crops: value.split(",").map((crop) => crop.trim()),
+      }));
+      return;
+    }
+
+    setSoilData((prev) => ({
+      ...prev,
+      [name]: ["ph", "n", "p", "k", "mg", "calcium"].includes(name)
+        ? Math.max(0, parseFloat(value))
+        : value,
+    }));
+  };
+
+  // Existing submit handler without rate limiting
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError(null);
+
+  //   try {
+  //     const payload = {
+  //       ...soilData,
+  //       user_id: user?.uid || "unknown_user",
+  //     };
+
+  //     const response = await fetch(
+  //       "https://krishak-backend-1015721062389.asia-south1.run.app/predict",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(payload),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch recommendations");
+  //     }
+
+  //     const data = await response.json();
+  //     console.log(data);
+  //     setRecommendedCrops(data.Recommended_Crops);
+  //     setFormSubmitted(true);
+  //   } catch (err) {
+  //     setError(
+  //       err instanceof Error ? err.message : "An unknown error occurred"
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // sumit handler with late limitng
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Get the current date
+    const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+    // Retrieve request data from local storage
+    const requestData = JSON.parse(localStorage.getItem("requestData") || "{}");
+
+    // Check if the user has already made 5 requests today
+    if (requestData.date === today && requestData.count >= 5) {
+      setError("You have reached the daily limit of 5 requests.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const payload = {
+        ...soilData,
+        user_id: user?.uid || "unknown_user",
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/predict`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch recommendations");
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setRecommendedCrops(data.Recommended_Crops);
+      setFormSubmitted(true);
+
+      // Update request count in local storage
+      const updatedRequestData = {
+        date: today,
+        count: requestData.date === today ? requestData.count + 1 : 1,
+      };
+      localStorage.setItem("requestData", JSON.stringify(updatedRequestData));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Existing logout handler
   const handleLogout = () => {
-    signOut(auth).then(() => {
+    auth.signOut().then(() => {
       router.push("/signin");
     });
   };
 
-  const handleAddSoilData = () => {
-    // In a real app, this would navigate to a form or open a modal
-    alert("Navigate to add soil data form");
+  // Reset form to submit new recommendations
+  const handleNewRecommendation = () => {
+    setFormSubmitted(false);
+    setRecommendedCrops([]);
+    setSoilData({
+      n: 0,
+      p: 0,
+      k: 0,
+      mg: 0,
+      calcium: 0,
+      ph: 0,
+      previous_crops: [],
+      district: "",
+      state: "",
+    });
   };
-
-  const handleEditSoilData = (id: number) => {
-    // In a real app, this would navigate to a form with the soil data pre-filled
-    alert(`Edit soil data with ID: ${id}`);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="space-y-4 text-center">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-white text-lg">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!user) {
-    // This should not happen due to the redirect in useEffect, but just in case
     return null;
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
-      {/* Sidebar */}
-      <motion.div
-        initial={{ x: sidebarOpen ? 0 : -280 }}
-        animate={{ x: sidebarOpen ? 0 : -280 }}
-        transition={{ duration: 0.3 }}
-        className="w-72 bg-black border-r border-gray-800 flex flex-col"
-      >
-        <div className="p-6 border-b border-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white relative overflow-hidden">
+      {/* Blurred Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Image
               src="/logo1.jpeg"
@@ -156,243 +232,245 @@ const DashboardPage = () => {
             />
             <h1 className="text-xl font-bold text-green-500">Krishak</h1>
           </div>
-        </div>
 
-        <div className="p-6 border-b border-gray-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-lg font-bold">
-              {user.displayName?.charAt(0).toUpperCase() || "U"}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-lg font-bold">
+                {user.displayName?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium">{user.displayName}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium truncate">{user.displayName}</p>
-              <p className="text-sm text-gray-400 truncate">{user.email}</p>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="text-red-500 hover:bg-red-500/10 p-2 rounded-full transition-colors"
+            >
+              <FiLogOut className="w-5 h-5" />
+            </button>
           </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto p-4">
-          <nav className="space-y-2">
-            <Link
-              href="/dashboard"
-              className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-            >
-              <FiHome className="text-green-500" />
-              <span>Dashboard</span>
-            </Link>
-
-            <button className="w-full flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-gray-800 transition-colors">
-              <FiPlus className="text-green-500" />
-              <span>
-                <Link href="/soilForm">
-                  {soilData.length > 0 ? "Add New Soil Data" : "Add Soil Data"}
-                </Link>
-              </span>
-            </button>
-
-            {soilData.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center space-x-2 pl-3">
-                  <FiList className="text-green-500" />
-                  <span className="text-sm text-gray-400">Soil Data</span>
-                </div>
-
-                {soilData.map((data) => (
-                  <button
-                    key={data.id}
-                    onClick={() => handleEditSoilData(data.id)}
-                    className="w-full flex items-center justify-between p-3 pl-8 rounded-lg text-white hover:bg-gray-800 transition-colors"
-                  >
-                    <span className="truncate">{data.name}</span>
-                    <FiEdit className="text-gray-400 hover:text-green-500" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-gray-800 space-y-2">
-          <Link
-            href="/settings"
-            className="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-gray-800 transition-colors"
-          >
-            <FiSettings className="text-green-500" />
-            <span>Settings</span>
-          </Link>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-gray-800 transition-colors"
-          >
-            <FiLogOut className="text-red-500" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </motion.div>
+      </nav>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-black border-b border-gray-800 p-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+      <div className="min-h-screen flex items-center justify-center pt-16 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-4xl">
+          <AnimatePresence mode="wait">
+            {!formSubmitted ? (
+              <motion.div
+                key="soil-form"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl p-8"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-xl font-bold">Dashboard</h1>
-            </div>
-            <div className="w-6 h-6"></div> {/* Empty div for flex spacing */}
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-900 p-6">
-          {/* Alert if no soil data */}
-          {soilData.length === 0 && (
-            <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mb-6 flex items-center">
-              <svg
-                className="w-6 h-6 text-yellow-500 mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-              <div>
-                <p className="text-yellow-300 font-medium">
-                  No soil data available
-                </p>
-                <p className="text-yellow-200/70 text-sm">
-                  Please add soil data to get crop recommendations
-                </p>
-              </div>
-              <button
-                onClick={handleAddSoilData}
-                className="ml-auto bg-yellow-700 hover:bg-yellow-600 text-white rounded-lg px-4 py-2 text-sm transition-colors"
-              >
-                Add Soil Data
-              </button>
-            </div>
-          )}
-
-          {/* Recommended Crops Section */}
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Recommended Crops</h2>
-              {/* <Link
-                href="/recommendations"
-                className="text-green-500 hover:text-green-400 text-sm flex items-center transition-colors"
-              >
-                View All
-                <svg
-                  className="w-4 h-4 ml-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Link> */}
-            </div>
-
-            {soilData.length === 0 ? (
-              <div className="bg-gray-800 rounded-lg p-8 text-center">
-                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FiPlus className="text-green-500 text-xl" />
-                </div>
-                <h3 className="text-xl font-medium mb-2">
-                  No Recommendations Yet
-                </h3>
-                <p className="text-gray-400 mb-6">
-                  Add soil data to get personalized crop recommendations
-                </p>
-                <button
-                  onClick={handleAddSoilData}
-                  className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-6 py-3 transition-colors"
-                >
-                  Add Soil Data
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {recommendedCrops.map((crop) => (
-                  <div
-                    key={crop.id}
-                    className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-green-500 transition-colors"
-                  >
-                    <div className="h-32 bg-gray-700 relative">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        {/* Placeholder for crop image */}
-                        <span className="text-4xl">
-                          {crop.name === "Wheat"
-                            ? "🌾"
-                            : crop.name === "Corn"
-                            ? "🌽"
-                            : crop.name === "Soybeans"
-                            ? "🫘"
-                            : crop.name === "Rice"
-                            ? "🍚"
-                            : "🌱"}
-                        </span>
+                <h2 className="text-3xl font-bold mb-6 text-center text-green-500">
+                  Soil Data Analysis
+                </h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Numeric Inputs */}
+                    {["n", "p", "k", "mg", "calcium"].map((field) => (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          {field.toUpperCase()} Level
+                        </label>
+                        <input
+                          type="number"
+                          name={field}
+                          value={soilData[field as keyof SoilData]}
+                          onChange={handleInputChange}
+                          min="0"
+                          className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                          required
+                        />
                       </div>
-                      <div className="absolute top-2 right-2 bg-green-500 text-xs text-white rounded-full px-2 py-1 font-medium">
-                        {crop.confidence}% Match
-                      </div>
+                    ))}
+
+                    {/* pH Input */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        pH Level
+                      </label>
+                      <input
+                        type="number"
+                        name="ph"
+                        step="0.1"
+                        value={soilData.ph}
+                        onChange={handleInputChange}
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                        required
+                      />
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg mb-2">{crop.name}</h3>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex flex-col">
-                          <span className="text-gray-400">Soil Match</span>
-                          <span className="font-medium">{crop.soilMatch}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray-400">Yield</span>
-                          <span className="font-medium">{crop.yield}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray-400">Profit</span>
-                          <span className="font-medium">{crop.profit}</span>
-                        </div>
-                      </div>
+
+                    {/* Previous Crops */}
+                    <div className="col-span-full">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Previous Crops (comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        name="previous_crops"
+                        value={soilData.previous_crops.join(", ")}
+                        onChange={handleInputChange}
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                        placeholder="e.g., Wheat, Soybean"
+                      />
+                    </div>
+
+                    {/* Location Inputs */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        District
+                      </label>
+                      <input
+                        type="text"
+                        name="district"
+                        value={soilData.district}
+                        onChange={handleInputChange}
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        State
+                      </label>
+                      <input
+                        type="text"
+                        name="state"
+                        value={soilData.state}
+                        onChange={handleInputChange}
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                        required
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-green-600 text-white py-4 rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <div className="animate-spin h-6 w-6 border-3 border-white border-t-transparent rounded-full"></div>
+                    ) : (
+                      <>
+                        <FiSend className="w-5 h-5" />
+                        <span>Get Recommendations</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="recommendations"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-6"
+              >
+                {/* Error Handling */}
+                {error && (
+                  <div className="bg-red-900/30 backdrop-blur-lg border border-red-700 rounded-2xl p-6 flex items-center">
+                    <FiAlertCircle className="text-red-500 mr-4 w-6 h-6" />
+                    <p className="text-red-300">{error}</p>
+                  </div>
+                )}
+
+                {/* Recommended Crops Grid */}
+                <div className=" mt-1.5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendedCrops.map((crop, index) => (
+                    <motion.div
+                      key={crop.Commodity}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.1,
+                      }}
+                      className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden transform transition-all hover:scale-105 hover:border-green-500"
+                    >
+                      <div className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-2xl font-bold text-green-500">
+                            {crop.Commodity}
+                          </h3>
+                          <span className="bg-green-900/50 text-green-300 text-xs px-3 min-w-fit py-1 rounded-full text-center">
+                            {crop.Compatibility}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div>
+                            <p className="text-gray-400 text-sm">
+                              Profitability
+                            </p>
+                            <p className="font-semibold text-white">
+                              ₹{crop.Profitability}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-sm">
+                              Fertilizer Cost
+                            </p>
+                            <p className="font-semibold text-white">
+                              ₹{crop.Fertilizer_Cost}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-400 mb-2 text-sm">
+                            Fertilizer Adjustments
+                          </p>
+                          <div className="bg-white/5 rounded-xl p-3">
+                            {Object.entries(crop.Fertilizer_Adjustments).map(
+                              ([key, value]) => (
+                                <div
+                                  key={key}
+                                  className="flex justify-between text-sm py-1"
+                                >
+                                  <span className="text-gray-300">
+                                    {key}{" "}
+                                    <span className="font-thin text-zinc-500 text-xs">
+                                      hec/Kg
+                                    </span>
+                                  </span>
+                                  <span className="text-green-400">
+                                    {value}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* New Recommendation Button */}
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={handleNewRecommendation}
+                    className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors flex items-center space-x-2"
+                  >
+                    <FiSend className="w-5 h-5" />
+                    <span>New Recommendation</span>
+                  </button>
+                </div>
+              </motion.div>
             )}
-          </section>
-        </main>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
 };
 
-export default DashboardPage;
+export default SoilRecommendationPage;
