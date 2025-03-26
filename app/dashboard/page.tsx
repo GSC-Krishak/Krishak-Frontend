@@ -85,7 +85,10 @@ const SoilRecommendationPage: React.FC = () => {
     setSoilData((prev) => ({
       ...prev,
       [name]: ["ph", "n", "p", "k", "mg", "calcium"].includes(name)
-        ? Math.max(0, parseFloat(value))
+        ? Math.max(
+            0,
+            name === "ph" ? Math.min(parseFloat(value), 14) : parseFloat(value)
+          )
         : value,
     }));
   };
@@ -141,7 +144,9 @@ const SoilRecommendationPage: React.FC = () => {
     const requestData = JSON.parse(localStorage.getItem("requestData") || "{}");
 
     // Check if the user has already made 5 requests today
-    if (requestData.date === today && requestData.count >= 5) {
+    if (requestData.date === today && requestData.count >= 20) {
+      // give a message to the user
+      alert("You have reached the daily limit of 5 requests.");
       setError("You have reached the daily limit of 5 requests.");
       return;
     }
@@ -219,7 +224,7 @@ const SoilRecommendationPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white relative overflow-hidden min-w-screen">
       {/* Blurred Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -298,6 +303,8 @@ const SoilRecommendationPage: React.FC = () => {
                         type="number"
                         name="ph"
                         step="0.1"
+                        min="0"
+                        max="14"
                         value={soilData.ph}
                         onChange={handleInputChange}
                         className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
@@ -384,7 +391,7 @@ const SoilRecommendationPage: React.FC = () => {
                 )}
 
                 {/* Recommended Crops Grid */}
-                <div className=" mt-1.5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className=" mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {recommendedCrops.map((crop, index) => (
                     <motion.div
                       key={crop.Commodity}
@@ -394,7 +401,7 @@ const SoilRecommendationPage: React.FC = () => {
                         duration: 0.3,
                         delay: index * 0.1,
                       }}
-                      className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden transform transition-all hover:scale-105 hover:border-green-500"
+                      className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden transform transition-all hover:scale-105 hover:border-green-500 hover:shadow-2xl min-w-fit"
                     >
                       <div className="p-6">
                         <div className="flex justify-between items-center mb-4">
@@ -436,13 +443,8 @@ const SoilRecommendationPage: React.FC = () => {
                                   key={key}
                                   className="flex justify-between text-sm py-1"
                                 >
-                                  <span className="text-gray-300">
-                                    {key}{" "}
-                                    <span className="font-thin text-zinc-500 text-xs">
-                                      hec/Kg
-                                    </span>
-                                  </span>
-                                  <span className="text-green-400">
+                                  <span className="text-gray-300">{key} </span>
+                                  <span className="text-green-400 text-xs">
                                     {value}
                                   </span>
                                 </div>
