@@ -144,7 +144,7 @@ const SoilRecommendationPage: React.FC = () => {
     const requestData = JSON.parse(localStorage.getItem("requestData") || "{}");
 
     // Check if the user has already made 5 requests today
-    if (requestData.date === today && requestData.count >= 20) {
+    if (requestData.date === today && requestData.count >= 5) {
       // give a message to the user
       alert("You have reached the daily limit of 5 requests.");
       setError("You have reached the daily limit of 5 requests.");
