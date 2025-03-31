@@ -12,13 +12,13 @@ import {
 } from "firebase/auth";
 import { app } from "../utils/firebase";
 import { useRouter } from "next/navigation";
+import { theme } from "../utils/theme";
 
 const auth = getAuth(app);
 
 const handleGoogleSignIn = () => {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider);
-  
 };
 
 const LoginPage: React.FC = () => {
@@ -27,14 +27,17 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.push("/dashboard");
+        router.push("/recomendation");
       }
     });
     return () => unsubscribe();
   }, [router]);
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
+    <div
+      className="flex min-h-screen"
+      style={{ backgroundColor: theme.primary, color: theme.light }}
+    >
       <Head>
         <title>Login | Krishak</title>
         <meta
@@ -66,8 +69,13 @@ const LoginPage: React.FC = () => {
                 className="mx-auto rounded-full"
               />
             </motion.div>
-            <h1 className="text-3xl font-bold text-green-500 mb-2">Krishak</h1>
-            <p className="text-gray-400">
+            <h1
+              className="text-3xl font-bold mb-2"
+              style={{ color: theme.light }}
+            >
+              Krishak
+            </h1>
+            <p style={{ color: `${theme.light}80` }}>
               Your personal crop recommendation assistant
             </p>
           </div>
@@ -75,10 +83,19 @@ const LoginPage: React.FC = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
+                <div
+                  className="w-full border-t"
+                  style={{ borderColor: `${theme.light}30` }}
+                ></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black text-gray-400">
+                <span
+                  className="px-2"
+                  style={{
+                    backgroundColor: theme.primary,
+                    color: `${theme.light}80`,
+                  }}
+                >
                   Continue with
                 </span>
               </div>
@@ -88,7 +105,8 @@ const LoginPage: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleGoogleSignIn}
-              className="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-medium transition-all duration-200 relative overflow-hidden mt-4 flex items-center justify-center gap-2"
+              style={{ backgroundColor: theme.secondary }}
+              className="w-full hover:opacity-90 py-3 rounded-lg font-medium transition-all duration-200 relative overflow-hidden mt-4 flex items-center justify-center gap-2 text-white"
             >
               <FaGoogle />
               Sign in with Google
@@ -105,7 +123,12 @@ const LoginPage: React.FC = () => {
           transition={{ duration: 1 }}
           className="absolute inset-0"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/90 z-10"></div>
+          <div
+            className="absolute inset-0 bg-gradient-to-br z-10"
+            style={{
+              background: `linear-gradient(to bottom right, ${theme.secondary}CC, ${theme.primary}E6)`,
+            }}
+          ></div>
           <Image
             src="/signin.jpg"
             alt="Agriculture Field"
@@ -120,6 +143,7 @@ const LoginPage: React.FC = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.5 }}
               className="text-4xl font-bold mb-4"
+              style={{ color: theme.light }}
             >
               Grow Smarter With Data
             </motion.h2>
@@ -127,7 +151,8 @@ const LoginPage: React.FC = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.7 }}
-              className="text-lg text-gray-200 max-w-md"
+              className="text-lg max-w-md"
+              style={{ color: `${theme.light}CC` }}
             >
               Get personalized crop recommendations based on soil conditions,
               climate data, and market trends.
@@ -141,10 +166,16 @@ const LoginPage: React.FC = () => {
             >
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
-                    <span className="text-green-400 text-xl">✓</span>
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center mb-2"
+                    style={{ backgroundColor: `${theme.secondary}` }}
+                  >
+                    <span style={{ color: theme.light }}>✓</span>
                   </div>
-                  <span className="text-sm text-gray-300">
+                  <span
+                    className="text-sm"
+                    style={{ color: `${theme.light}CC` }}
+                  >
                     {i === 1
                       ? "Data-driven"
                       : i === 2

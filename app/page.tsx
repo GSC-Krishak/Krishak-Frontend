@@ -13,18 +13,18 @@ const HomePage = () => {
       if (user) {
         router.push("/dashboard");
       } else {
-        router.push("/signin");
+        // Redirect to home instead of signin
+        router.push("/home");
       }
     });
-
     return () => unsubscribe();
   }, [auth, router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-white">
+    <div className="flex items-center justify-center min-h-screen bg-[#12372A] text-[#FBFADA]">
       <div className="text-center">
-        <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-lg mt-4">Checking authentication...</p>
+        <div className="w-16 h-16 border-4 border-[#436850] border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-lg mt-4">Loading Krishak...</p>
       </div>
     </div>
   );
