@@ -15,6 +15,11 @@ const geistMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: "Krishak",
   description: "Agriculture crop recommendation system",
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
+    apple: { url: "/favicon.ico", sizes: "any" },
+    shortcut: { url: "/favicon.ico" },
+  },
 };
 
 export default function RootLayout({
@@ -24,6 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

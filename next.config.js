@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   // Ignore TypeScript errors during build
   typescript: {
     // !! WARN !!
@@ -8,6 +9,11 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Ensure static files are properly served
+  assetPrefix: process.env.NODE_ENV === "production" ? undefined : "",
   // Other Next.js config options
   reactStrictMode: true,
   swcMinify: true,

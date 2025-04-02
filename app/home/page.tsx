@@ -1,11 +1,15 @@
 // src/app/page.tsx
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useScroll } from "framer-motion";
 import { ArrowRight, Leaf, LineChart, Database, Flower2 } from "lucide-react";
 import { WavyBackground } from "../ui/wavy-background";
-
+import Navbar from "../components/Navbar";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "../utils/firebase";
+import { useRouter } from "next/navigation";
+import { User } from "firebase/auth";
 import Link from "next/link";
 
 // Custom color theme based on the provided palette
@@ -94,12 +98,22 @@ const StepCard = ({
   );
 };
 
-export default function Home() {
+const Home: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const auth = getAuth(app);
   const ref = React.useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   // Soil particles floating animation
   const SoilParticle = ({
@@ -134,40 +148,9 @@ export default function Home() {
   };
 
   return (
-    <main className="bg-[#12372A] min-h-screen text-[#FBFADA] overflow-x-hidden">
-      {/* Glassmorphic Navbar */}
-      <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-6xl backdrop-blur-lg bg-[#12372A]/50 border border-[#FBFADA]/10 rounded-full px-6 py-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <img className="h-12 w-auto" src="logo1.jpeg" alt="Logo" />
-            <span className="font-bold text-xl">Krishak</span>
-          </div>
-          <div className="hidden md:flex gap-8">
-            <a
-              href="#features"
-              className="hover:text-[#FBFADA]/80 transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              className="hover:text-[#FBFADA]/80 transition-colors"
-            >
-              How It Works
-            </a>
-            <a href="#" className="hover:text-[#FBFADA]/80 transition-colors">
-              About
-            </a>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-[#FBFADA] text-[#12372A] px-4 py-2 rounded-full font-medium"
-          >
-            <Link href="/signin"> Get Started</Link>
-          </motion.button>
-        </div>
-      </nav>
+    <main className="bg-[#12372A] text-[#FBFADA] min-h-screen">
+      {/* Replace the old navbar with the new component */}
+      <Navbar user={user} />
 
       {/* New Hero Section with Wavy Background */}
       <section className="relative" ref={ref}>
@@ -444,4 +427,6 @@ export default function Home() {
       </footer>
     </main>
   );
-}
+};
+
+export default Home;

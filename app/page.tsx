@@ -7,7 +7,6 @@ import { app } from "./utils/firebase";
 const HomePage = () => {
   const router = useRouter();
   const auth = getAuth(app);
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -19,7 +18,6 @@ const HomePage = () => {
     });
     return () => unsubscribe();
   }, [auth, router]);
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#12372A] text-[#FBFADA]">
       <div className="text-center">
