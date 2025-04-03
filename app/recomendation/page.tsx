@@ -164,7 +164,7 @@ const SoilRecommendationPage: React.FC = () => {
     if (name === "previous_crops") {
       setSoilData((prev) => ({
         ...prev,
-        previous_crops: value.split(",").map((crop) => crop.trim()), // Ensure it's always an array
+        previous_crops: value.split(",").map((crop) => crop.trim()),
       }));
       return;
     }
@@ -188,7 +188,7 @@ const SoilRecommendationPage: React.FC = () => {
     setSoilData((prev) => ({
       ...prev,
       previous_crops: prev.previous_crops
-        .join(",") // Convert array back to string for processing
+        .join(",")
         .split(",")
         .map((crop) => crop.trim())
         .filter(Boolean),
