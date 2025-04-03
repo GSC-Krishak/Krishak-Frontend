@@ -173,16 +173,18 @@ const Home: React.FC = () => {
                   <RevealText text="AI-powered crop recommendations tailored to your soil's unique properties" />
                 </div>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="font-bold bg-[#FBFADA] rounded-full px-6 py-3 text-[#12372A] text-base w-fit flex items-center gap-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.5 }}
               >
-                Get Started <ArrowRight size={16} />
-              </motion.button>
+                <Link
+                  className="font-bold bg-[#FBFADA] rounded-full px-6 py-3 text-[#12372A] text-base w-fit flex items-center gap-2"
+                  href="/signin"
+                >
+                  Get started
+                </Link>
+              </motion.div>
             </div>
             <motion.div
               className="relative h-[300px] sm:h-[350px] md:h-[400px] w-full"

@@ -24,101 +24,108 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
   const handleLogout = () => {
     auth.signOut().then(() => {
-      router.push("/signin");
+      router.push("/home");
     });
   };
 
   return (
     <>
       <nav
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-6xl backdrop-blur-lg border rounded-full px-6 py-3"
+        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-6xl backdrop-blur-lg border-2 rounded-full px-6 py-3 flex justify-between items-center "
         style={{
           backgroundColor: `${theme.primary}80`,
           borderColor: `${theme.light}10`,
         }}
       >
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/logo1.jpeg"
-              width={48}
-              height={48}
-              className="rounded-full"
-              alt="Logo"
-            />
-            <span className="font-bold text-xl" style={{ color: theme.light }}>
-              Krishak
-            </span>
-          </div>
+        <div className="flex items-center  gap-2">
+          <Image
+            src="/logo1.jpeg"
+            width={48}
+            height={48}
+            className="rounded-full"
+            alt="Logo"
+          />
+          <span className="font-bold text-xl" style={{ color: theme.light }}>
+            Krishak
+          </span>
+        </div>
 
-          {/* Desktop Navigation - Visible on md and larger screens */}
-          <div className="hidden md:flex gap-8" style={{ color: theme.light }}>
-            <Link
-              href="/"
-              className="hover:opacity-80 transition-colors"
-              style={{ color: theme.light }}
-            >
-              Home
-            </Link>
-            <Link
-              href="/dashboard"
-              className="hover:opacity-80 transition-colors"
-              style={{ color: theme.light }}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/recomendation"
-              className="hover:opacity-80 transition-colors"
-              style={{ color: theme.light }}
-            >
-              Recommendations
-            </Link>
-            {/* Logout button in desktop view */}
+        <div
+          className="hidden md:flex gap-8 items-center"
+          style={{ color: theme.light }}
+        >
+          <Link
+            href="/"
+            className="hover:opacity-80 transition-colors"
+            style={{ color: theme.light }}
+          >
+            Home
+          </Link>
+          <Link
+            href="/dashboard"
+            className="hover:opacity-80 transition-colors"
+            style={{ color: theme.light }}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/recomendation"
+            className="hover:opacity-80 transition-colors"
+            style={{ color: theme.light }}
+          >
+            Recommendations
+          </Link>
+          {user ? (
             <button
               onClick={handleLogout}
               className="hover:opacity-80 transition-colors text-red-400"
             >
               Logout
             </button>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {user && (
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold"
-                  style={{
-                    backgroundColor: theme.secondary,
-                    color: theme.light,
-                  }}
-                >
-                  {user.displayName?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <span
-                  className="hidden md:block text-sm font-medium"
-                  style={{ color: theme.light }}
-                >
-                  {user.displayName}
-                </span>
-              </div>
-            )}
-
-            {/* Hamburger Menu Button - Only visible on mobile */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleMobileMenu}
-              className="md:hidden px-3 py-2 rounded-full"
-              style={{
-                backgroundColor: theme.secondary,
-                color: theme.light,
-              }}
-              aria-label="Menu"
+          ) : (
+            <Link
+              href="/signin"
+              className="font-bold bg-[#FBFADA] rounded-full px-6 py-3 text-[#12372A] text-base w-fit flex items-center gap-2"
             >
-              <FiMenu size={24} />
-            </motion.button>
-          </div>
+              Login
+            </Link>
+          )}
+        </div>
+
+        <div className="flex items-center gap-4">
+          {user && (
+            <div className="flex items-center gap-2">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold"
+                style={{
+                  backgroundColor: theme.secondary,
+                  color: theme.light,
+                }}
+              >
+                {user.displayName?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <span
+                className="hidden md:block text-sm font-medium"
+                style={{ color: theme.light }}
+              >
+                {user.displayName}
+              </span>
+            </div>
+          )}
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleMobileMenu}
+            className="md:hidden px-3 py-2 rounded-full"
+            style={{
+              backgroundColor: theme.secondary,
+              color: theme.light,
+            }}
+            aria-label="Menu"
+          >
+            <FiMenu size={24} />
+          </motion.button>
         </div>
       </nav>
 
@@ -172,18 +179,31 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                 Recommendations
               </Link>
 
-              {/* Logout button in mobile menu */}
-              <button
-                onClick={handleLogout}
-                className="py-3 px-4 rounded-lg text-left flex items-center gap-2 mt-4"
-                style={{
-                  color: "#ef4444",
-                  backgroundColor: `rgba(239, 68, 68, 0.15)`,
-                }}
-              >
-                <FiLogOut size={18} />
-                <span>Logout</span>
-              </button>
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="py-3 px-4 rounded-lg text-left flex items-center gap-2 mt-4"
+                  style={{
+                    color: "#ef4444",
+                    backgroundColor: `rgba(239, 68, 68, 0.15)`,
+                  }}
+                >
+                  <FiLogOut size={18} />
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <Link
+                  href="/signin"
+                  className="py-3 px-4 rounded-lg text-left flex items-center gap-2 mt-4"
+                  style={{
+                    color: theme.light,
+                    backgroundColor: `${theme.secondary}20`,
+                  }}
+                  onClick={toggleMobileMenu}
+                >
+                  <span>Login</span>
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

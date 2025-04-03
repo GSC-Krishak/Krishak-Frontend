@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { User } from "firebase/auth";
 import { theme } from "../utils/theme";
 import Navbar from "../components/Navbar";
+import Link from "next/link";
 
 // Type definitions (keep existing interfaces)
 interface SoilData {
@@ -82,9 +83,6 @@ const SoilRecommendationPage: React.FC = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [dailyRequestsCount, setDailyRequestsCount] = useState<number>(0);
   const [isLimitReached, setIsLimitReached] = useState<boolean>(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [fileUploading, setFileUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const DAILY_LIMIT = 5;
   const router = useRouter();
@@ -166,7 +164,7 @@ const SoilRecommendationPage: React.FC = () => {
     if (name === "previous_crops") {
       setSoilData((prev) => ({
         ...prev,
-        previous_crops: value.split(",").map((crop) => crop.trim()),
+        previous_crops: value.split(",").map((crop) => crop.trim()), // Ensure it's always an array
       }));
       return;
     }
@@ -176,75 +174,25 @@ const SoilRecommendationPage: React.FC = () => {
       [name]: ["ph", "n", "p", "k", "mg", "calcium", "moisture"].includes(name)
         ? Math.max(
             0,
-            name === "ph" ? Math.min(parseFloat(value), 14) : parseFloat(value)
+            name === "ph"
+              ? Math.min(parseFloat(value), 14)
+              : name === "moisture"
+              ? Math.min(parseFloat(value), 100)
+              : parseFloat(value)
           )
         : value,
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-  };
-
-  const handleFileUpload = async () => {
-    if (!file || !user?.uid) return;
-
-    setFileUploading(true);
-    try {
-      // Create a FormData object to send the file
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("userId", user.uid);
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/uploadSoilData`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to upload soil data");
-
-      const data = await response.json();
-
-      // Update soil data state with the parsed data from the file
-      setSoilData({
-        ...soilData,
-        ...data.soilData,
-      });
-
-      // Show success message
-      alert("Soil data uploaded and parsed successfully!");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "File upload failed");
-    } finally {
-      setFileUploading(false);
-    }
+  const processPreviousCrops = () => {
+    setSoilData((prev) => ({
+      ...prev,
+      previous_crops: prev.previous_crops
+        .join(",") // Convert array back to string for processing
+        .split(",")
+        .map((crop) => crop.trim())
+        .filter(Boolean),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -252,28 +200,34 @@ const SoilRecommendationPage: React.FC = () => {
 
     if (!user?.uid) {
       setError("User authentication required");
+      alert("User authentication required");
       return;
     }
 
-    // Check if daily limit reached
     if (isLimitReached) {
-      setError(
-        "You have reached the daily limit of 5 recommendations. Please try again tomorrow."
-      );
+      const limitMessage =
+        "You have reached the daily limit of 5 recommendations. Please try again tomorrow.";
+      setError(limitMessage);
+      alert(limitMessage);
       return;
     }
 
-    // Check if soil type is selected
     if (!soilData.soil_type) {
-      setError("Please select a soil type");
+      const soilTypeMessage = "Please select a soil type";
+      setError(soilTypeMessage);
+      alert(soilTypeMessage);
       return;
     }
 
-    // Check if moisture is provided
-    if (soilData.moisture <= 0) {
-      setError("Please enter a valid moisture level greater than 0");
+    if (soilData.moisture <= 0 || soilData.moisture > 100) {
+      const moistureMessage =
+        "Please enter a valid moisture level between 0 and 100";
+      setError(moistureMessage);
+      alert(moistureMessage);
       return;
     }
+
+    processPreviousCrops();
 
     setLoading(true);
     setError(null);
@@ -298,19 +252,24 @@ const SoilRecommendationPage: React.FC = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch recommendations");
+        const errorData = await response.json();
+        const errorMessage =
+          errorData.error || "Failed to fetch recommendations";
+        setError(errorMessage);
+        alert(errorMessage);
+        return; // Ensure no further execution after showing the alert
       }
 
       const data = await response.json();
       setRecommendedCrops(data.Recommended_Crops);
       setFormSubmitted(true);
 
-      // Increment the request count after successful submission
       incrementRequestCount(user.uid);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -351,6 +310,10 @@ const SoilRecommendationPage: React.FC = () => {
     return null;
   }
 
+  const MotionDiv = motion.div as React.FC<
+    React.HTMLAttributes<HTMLDivElement>
+  >;
+
   return (
     <div
       className="min-h-screen relative overflow-hidden min-w-screen"
@@ -389,7 +352,7 @@ const SoilRecommendationPage: React.FC = () => {
 
           <AnimatePresence mode="wait">
             {!formSubmitted ? (
-              <motion.div
+              <MotionDiv
                 key="soil-form"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -429,132 +392,6 @@ const SoilRecommendationPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* File Upload Section */}
-                <div
-                  className="mb-8 border-2 border-dashed rounded-lg p-4 text-center"
-                  style={{
-                    borderColor: dragActive ? theme.light : `${theme.light}50`,
-                    backgroundColor: dragActive
-                      ? `${theme.secondary}40`
-                      : `${theme.secondary}20`,
-                    transition: "all 0.2s ease",
-                  }}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleFileDrop}
-                >
-                  <div className="space-y-4 py-4">
-                    <FiUpload
-                      className="mx-auto"
-                      size={36}
-                      style={{ color: theme.light }}
-                    />
-                    <h3
-                      className="text-lg font-medium"
-                      style={{ color: theme.light }}
-                    >
-                      Upload Soil Data File
-                    </h3>
-                    <p style={{ color: `${theme.light}CC` }}>
-                      Drag & drop your CSV or Excel file here, or click to
-                      browse
-                    </p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                    />
-                    <div className="flex flex-col sm:flex-row justify-center gap-3 mt-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2"
-                        style={{
-                          backgroundColor: theme.accent,
-                          color: theme.light,
-                        }}
-                      >
-                        <FiFile size={16} />
-                        <span>Browse Files</span>
-                      </button>
-
-                      {file && (
-                        <button
-                          type="button"
-                          onClick={handleFileUpload}
-                          disabled={fileUploading}
-                          className="px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2"
-                          style={{
-                            backgroundColor: theme.secondary,
-                            color: theme.light,
-                          }}
-                        >
-                          {fileUploading ? (
-                            <div
-                              className="animate-spin h-4 w-4 border-2 rounded-full"
-                              style={{
-                                borderColor: theme.light,
-                                borderTopColor: "transparent",
-                              }}
-                            ></div>
-                          ) : (
-                            <FiUpload size={16} />
-                          )}
-                          <span>
-                            {fileUploading ? "Uploading..." : "Upload"}
-                          </span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {file && (
-                    <div
-                      className="mt-3 p-3 rounded-lg flex items-center justify-between"
-                      style={{ backgroundColor: `${theme.primary}80` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <FiFile style={{ color: theme.light }} />
-                        <span style={{ color: theme.light }}>{file.name}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setFile(null)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  )}
-
-                  <p
-                    className="text-xs mt-3"
-                    style={{ color: `${theme.light}99` }}
-                  >
-                    Supported formats: PDF
-                  </p>
-                </div>
-
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-full">
-                    <hr
-                      className="w-full border-t"
-                      style={{ borderColor: `${theme.light}30` }}
-                    />
-                    <span
-                      className="absolute px-3 text-sm -translate-y-1/2 rounded-full"
-                      style={{
-                        backgroundColor: theme.secondary,
-                        color: theme.light,
-                      }}
-                    >
-                      OR
-                    </span>
-                  </div>
-                </div>
-
                 {/* Form with proper closure */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -572,14 +409,14 @@ const SoilRecommendationPage: React.FC = () => {
                         onChange={handleInputChange}
                         className="w-full backdrop-blur-lg border rounded-xl px-4 py-3 focus:outline-none transition-all"
                         style={{
-                          backgroundColor: `${theme.secondary}30`,
-                          borderColor: `${theme.light}30`,
-                          color: theme.light,
+                          backgroundColor: "#f0f4f8", // Light and eye-comforting background color
+                          borderColor: "#d1d5db", // Soft border color
+                          color: "#374151", // Dark text color for readability
                         }}
                         required
                       >
                         <option value="" disabled>
-                          Select soil type
+                          Select Soil Type
                         </option>
                         {SOIL_TYPES.map((type) => (
                           <option key={type} value={type}>
@@ -757,9 +594,9 @@ const SoilRecommendationPage: React.FC = () => {
                     )}
                   </button>
                 </form>
-              </motion.div>
+              </MotionDiv>
             ) : (
-              <motion.div
+              <MotionDiv
                 key="recommendations"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -998,7 +835,7 @@ const SoilRecommendationPage: React.FC = () => {
                     <span>Go to Dashboard</span>
                   </Link>
                 </div>
-              </motion.div>
+              </MotionDiv>
             )}
           </AnimatePresence>
         </div>
