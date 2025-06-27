@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- Light Mode Colors --- */
+  --light-brand-primary: #2A6B46;
+  --light-brand-accent: #8DD256;
+  --light-background-primary: #F8FDF5;
+  --light-background-secondary: #EBF4E0;
+  --light-text-primary: #333333;
+  --light-text-secondary: #5C5C5C;
+  --light-border-color: #D1D5DB;
+  --light-shadow-color: rgba(0, 0, 0, 0.08);
+  --light-semantic-profit: #FFC107;
+
+  /* --- Dark Mode Colors --- */
+  --dark-brand-primary: #3C7F58;
+  --dark-brand-accent: #A2E378;
+  --dark-background-primary: #1A2B27;
+  --dark-background-secondary: #2A3E39;
+  --dark-text-primary: #E0F2E5;
+  --dark-text-secondary: #A7B9B4;
+  --dark-border-color: #3F504B;
+  --dark-shadow-color: rgba(0, 0, 0, 0.4);
+  --dark-semantic-profit: #FFD666;
+
+  /* --- Semantic Colors --- */
+  --color-semantic-success: #28A745;
+  --color-semantic-error: #DC3545;
+  --color-semantic-info: #007BFF;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Default Light Theme */
+:root {
+  --current-brand-primary: var(--light-brand-primary);
+  --current-brand-accent: var(--light-brand-accent);
+  --current-background-primary: var(--light-background-primary);
+  --current-background-secondary: var(--light-background-secondary);
+  --current-text-primary: var(--light-text-primary);
+  --current-text-secondary: var(--light-text-secondary);
+  --current-border-color: var(--light-border-color);
+  --current-shadow-color: var(--light-shadow-color);
+  --current-semantic-profit: var(--light-semantic-profit);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark Theme */
+.dark {
+  --current-brand-primary: var(--dark-brand-primary);
+  --current-brand-accent: var(--dark-brand-accent);
+  --current-background-primary: var(--dark-background-primary);
+  --current-background-secondary: var(--dark-background-secondary);
+  --current-text-primary: var(--dark-text-primary);
+  --current-text-secondary: var(--dark-text-secondary);
+  --current-border-color: var(--dark-border-color);
+  --current-shadow-color: var(--dark-shadow-color);
+  --current-semantic-profit: var(--dark-semantic-profit);
 }
 
+/* Base styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--current-background-primary);
+  color: var(--current-text-primary);
+}
+
+/* Utility classes */
+.bg-brand-primary {
+  background-color: var(--current-brand-primary);
+}
+
+.bg-brand-accent {
+  background-color: var(--current-brand-accent);
+}
+
+.bg-background-primary {
+  background-color: var(--current-background-primary);
+}
+
+.bg-background-secondary {
+  background-color: var(--current-background-secondary);
+}
+
+.text-brand-primary {
+  color: var(--current-brand-primary);
+}
+
+.text-brand-accent {
+  color: var(--current-brand-accent);
+}
+
+.text-text-primary {
+  color: var(--current-text-primary);
+}
+
+.text-text-secondary {
+  color: var(--current-text-secondary);
+}
+
+.border-brand-primary {
+  border-color: var(--current-brand-primary);
+}
+
+.border-brand-accent {
+  border-color: var(--current-brand-accent);
+}
+
+.border-border {
+  border-color: var(--current-border-color);
 }

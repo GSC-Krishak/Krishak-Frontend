@@ -432,41 +432,20 @@ const Dashboard: React.FC = () => {
   const chartData = prepareChartData();
 
   return (
-    <div
-      className="min-h-screen bg-[#12372A] text-[#FBFADA]"
-      style={{ backgroundColor: theme.primary, color: theme.light }}
-    >
-      {/* Replace the old navbar with the new component */}
+    <div className="min-h-screen bg-background-primary text-text-primary">
       <Navbar user={user} />
-
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-20">
         {/* Tab Navigation */}
-        <div
-          className="mb-6 border-b"
-          style={{ borderColor: `${theme.light}50` }}
-        >
+        <div className="mb-6 border-b border-border">
           <nav className="-mb-px flex space-x-8">
             <button
-              className="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-              style={{
-                borderColor:
-                  activeTab === "dashboard" ? theme.light : "transparent",
-                color: theme.light,
-                opacity: activeTab === "dashboard" ? 1 : 0.7,
-              }}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === "dashboard" ? "border-brand-accent text-brand-accent" : "border-transparent text-text-secondary"}`}
               onClick={() => setActiveTab("dashboard")}
             >
               Dashboard
             </button>
             <button
-              className="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-              style={{
-                borderColor:
-                  activeTab === "history" ? theme.light : "transparent",
-                color: theme.light,
-                opacity: activeTab === "history" ? 1 : 0.7,
-              }}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === "history" ? "border-brand-accent text-brand-accent" : "border-transparent text-text-secondary"}`}
               onClick={() => setActiveTab("history")}
             >
               History
